@@ -12,15 +12,6 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  //url      = env("DATABASE_URL")
-}
-
-model User {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique
-  name      String?
-  expenses  Expense[]
-  createdAt DateTime  @default(now())
 }
 
 model Expense {
@@ -29,8 +20,4 @@ model Expense {
   amount      Decimal
   category    String
   date        DateTime @default(now())
-  
-  // Relation to User
-  userId      Int
-  user        User     @relation(fields: [userId], references: [id])
 }
