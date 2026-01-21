@@ -6,20 +6,14 @@ import { UpdateExpenseDto } from './dto/update-expense.dto';
 @Injectable()
 export class ExpensesService {
   constructor(private prisma: PrismaService) {}
-  async create(createExpenseDto: CreateExpenseDto, userId: number) {
+  async create(createExpenseDto: CreateExpenseDto) {
     return this.prisma.expense.create({
-      data: {
-        // 2. Spread the DTO properties (title, amount, category)
-        ...createExpenseDto,
-        
-        // 3. Explicitly link the User relation
-        userId: userId, 
-      },
+      data: {...createExpenseDto}
     });
   }
 
   async findAll() {
-    return this.prisma.expense.findMany({include: {user: true}});
+    return this.prisma.expense.findMany();
   }
 
   async findOne(id: number) {
