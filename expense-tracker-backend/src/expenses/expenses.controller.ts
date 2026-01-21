@@ -9,7 +9,6 @@ export class ExpensesController {
 
   @Post()
   create(@Body() createExpenseDto: CreateExpenseDto) {
-    const tempUserId = 1;
     return this.expensesService.create(createExpenseDto);
   }
 
