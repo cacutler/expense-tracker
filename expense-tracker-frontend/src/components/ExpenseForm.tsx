@@ -1,14 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { CreateExpenseData } from '@/types/expense';
-import { createExpense } from '@/lib/api';
+import { useState, useEffect } from 'react';
+import { CreateExpenseData, Expense } from '@/types/expense';
+import { createExpense, updateExpense } from '@/lib/api';
 
 interface ExpenseFormProps {
   onExpenseAdded: () => void;
+  expenseToEdit?: Expense | null;
+  onCancelEdit?: () => void;
 }
 
-export default function ExpenseForm({ onExpenseAdded }: ExpenseFormProps) {
+export default function ExpenseForm({ onExpenseAdded, expenseToEdit, onCancelEdit }: ExpenseFormProps) {
   const [formData, setFormData] = useState<CreateExpenseData>({
     title: '',
     amount: 0,
@@ -16,18 +18,35 @@ export default function ExpenseForm({ onExpenseAdded }: ExpenseFormProps) {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (expenseToEdit) {
+      setFormData({
+        title: expenseToEdit.title,
+        amount: expenseToEdit.amount,
+        category: expenseToEdit.category,
+      });
+    } else {
+      setFormData({ title: '', amount: 0, category: '' });
+    }
+  }, [expenseToEdit]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.amount || !formData.category) return;
 
     setIsSubmitting(true);
     try {
-      await createExpense(formData);
+      if (expenseToEdit) {
+        await updateExpense(expenseToEdit.id, formData);
+      } else {
+        await createExpense(formData);
+      }
       setFormData({ title: '', amount: 0, category: '' });
       onExpenseAdded();
+      if (onCancelEdit) onCancelEdit();
     } catch (error) {
-      console.error('Failed to create expense:', error);
-      alert('Failed to create expense. Please try again.');
+      console.error('Failed to save expense:', error);
+      alert('Failed to save expense. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -43,7 +62,7 @@ export default function ExpenseForm({ onExpenseAdded }: ExpenseFormProps) {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4">Add New Expense</h2>
+      <h2 className="text-xl font-semibold mb-4">{expenseToEdit ? 'Edit Expense' : 'Add New Expense'}</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
@@ -102,13 +121,24 @@ export default function ExpenseForm({ onExpenseAdded }: ExpenseFormProps) {
           </select>
         </div>
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isSubmitting ? 'Adding...' : 'Add Expense'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? (expenseToEdit ? 'Updating...' : 'Adding...') : (expenseToEdit ? 'Update Expense' : 'Add Expense')}
+          </button>
+          {expenseToEdit && onCancelEdit && (
+            <button
+              type="button"
+              onClick={onCancelEdit}
+              className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );

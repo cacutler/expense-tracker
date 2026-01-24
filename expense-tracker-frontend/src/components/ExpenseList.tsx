@@ -7,9 +7,10 @@ import ExpenseItem from './ExpenseItem';
 
 interface ExpenseListProps {
   refreshTrigger: number;
+  onExpenseEdit: (expense: Expense) => void;
 }
 
-export default function ExpenseList({ refreshTrigger }: ExpenseListProps) {
+export default function ExpenseList({ refreshTrigger, onExpenseEdit }: ExpenseListProps) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -88,6 +89,7 @@ export default function ExpenseList({ refreshTrigger }: ExpenseListProps) {
               key={expense.id}
               expense={expense}
               onExpenseDeleted={handleExpenseDeleted}
+              onExpenseEdit={onExpenseEdit}
             />
           ))}
         </div>

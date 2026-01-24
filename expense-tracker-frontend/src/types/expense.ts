@@ -5,7 +5,6 @@ export interface Expense {
   category: string;
   date: Date;
 }
-
 export interface CreateExpenseData {
   title: string;
   amount: number;
